@@ -8,6 +8,10 @@ on:
   pull_request:
   workflow_dispatch:
 
+# Memberikan izin token GitHub untuk menulis ke GitHub Pages
+permissions:
+  contents: write
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -38,7 +42,7 @@ jobs:
       - name: Run Playwright BDD tests
         run: npm test
 
-      - name: Upload Playwright HTML report
+      - name: Upload Playwright HTML report (Artifacts)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -46,7 +50,7 @@ jobs:
           path: playwright-report
           if-no-files-found: error
 
-      - name: Upload Allure report
+      - name: Upload Allure report (Artifacts)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -54,7 +58,7 @@ jobs:
           path: allure-report
           if-no-files-found: error
 
-      - name: Upload raw test results
+      - name: Upload raw test results (Artifacts)
         if: always()
         uses: actions/upload-artifact@v4
         with:
@@ -63,3 +67,13 @@ jobs:
             test-results
             allure-results
           if-no-files-found: error
+
+      # STEP BARU: Otomatis publish Playwright Report ke GitHub Pages
+      - name: Deploy Playwright Report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./playwright-report
+          user_name: 'github-actions[bot]'
+          user_email: 'github-actions[bot]@users.noreply.github.com'
