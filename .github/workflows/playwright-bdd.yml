@@ -68,12 +68,20 @@ jobs:
             allure-results
           if-no-files-found: error
 
-      # STEP BARU: Otomatis publish Playwright Report ke GitHub Pages
-      - name: Deploy Playwright Report to GitHub Pages
+      # STEP BARU: Gabungkan kedua report ke satu folder khusus sebelum di-deploy
+      - name: Combine Reports for Deployment
+        if: always()
+        run: |
+          mkdir -p public-reports
+          if [ -d "playwright-report" ]; then cp -r playwright-report public-reports/playwright; fi
+          if [ -d "allure-report" ]; then cp -r allure-report public-reports/allure; fi
+
+      # STEP UPDATE: Deploy folder gabungan ke GitHub Pages
+      - name: Deploy All Reports to GitHub Pages
         if: always()
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./playwright-report
+          publish_dir: ./public-reports
           user_name: 'github-actions[bot]'
           user_email: 'github-actions[bot]@users.noreply.github.com'
